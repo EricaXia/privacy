@@ -143,6 +143,11 @@ def _run_threshold_attack(attack_input: AttackInputData):
     )
 
     roc_curve = RocCurve(tpr=tpr, fpr=fpr, thresholds=thresholds)
+    clf_report = metrics.classification_report(
+        y_true=np.concatenate((np.zeros(ntrain), np.ones(ntest))),
+        y_pred=np.concatenate((loss_train, loss_test)),
+        output_dict=True,
+    )
 
     return SingleAttackResult(
         slice_spec=_get_slice_spec(attack_input),
@@ -151,6 +156,7 @@ def _run_threshold_attack(attack_input: AttackInputData):
         membership_scores_train=-attack_input.get_loss_train(),
         membership_scores_test=-attack_input.get_loss_test(),
         roc_curve=roc_curve,
+        clf_report=clf_report,
     )
 
 
@@ -165,6 +171,14 @@ def _run_threshold_entropy_attack(attack_input: AttackInputData):
 
     roc_curve = RocCurve(tpr=tpr, fpr=fpr, thresholds=thresholds)
 
+    clf_report = metrics.classification_report(
+        y_true=np.concatenate((np.zeros(ntrain), np.ones(ntest))),
+        y_pred=np.concatenate(
+            (attack_input.get_entropy_train(), attack_input.get_entropy_test())
+        ),
+        output_dict=True,
+    )
+
     return SingleAttackResult(
         slice_spec=_get_slice_spec(attack_input),
         data_size=DataSize(ntrain=ntrain, ntest=ntest),
@@ -172,6 +186,7 @@ def _run_threshold_entropy_attack(attack_input: AttackInputData):
         membership_scores_train=-attack_input.get_entropy_train(),
         membership_scores_test=-attack_input.get_entropy_test(),
         roc_curve=roc_curve,
+        clf_report=clf_report,
     )
 
 
